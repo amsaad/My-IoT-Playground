@@ -3,8 +3,8 @@
 #include <ArduinoJson.h>
 #include "StringSplitter.h"
 
-const char* ssid = "AshiPhone";
-const char* password = "qwertyui";
+const char* ssid = "xxxxxx";
+const char* password = "xxxxx";
 WiFiClient client;
 
 void setup() {
