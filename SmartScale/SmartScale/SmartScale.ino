@@ -3,13 +3,14 @@
 
 #define CLK 2
 #define DIO 4
+
 int DOUTPIN = 10;
 int SCKPIN = 11;
 int DisplayPIN = 5;
 int LEDPIN = 3;
 int BUTTONPIN = 7;
 
-float MinWeight = 16.8f;
+float MinWeight = 16.2f;
 float WeightThreshold = 1.0f;
 float calValue = 2025;
 long stabilisingtime = 2000;
