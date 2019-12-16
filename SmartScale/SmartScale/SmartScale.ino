@@ -12,7 +12,7 @@ int BUTTONPIN = 7;
 
 float MinWeight = 16.2f;
 float WeightThreshold = 1.0f;
-float calValue = 2025;
+float calValue = 21.25;
 long stabilisingtime = 2000;
 
 float currentWeight = 0.0;
@@ -22,7 +22,7 @@ unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 50;
 int lastButtonState = LOW;
 int buttonState;
-unsigned long lastTimeSensorCheck = 0;
+unsigned long lastTimeSensorCheck;
 const uint8_t SEG_REDY[] = {
   SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,           // H
   SEG_B | SEG_C                                  // I
@@ -63,9 +63,8 @@ void setup() {
     digitalWrite(LEDPIN, (i % 2));
     delay(200);
   }
-  getWeight();
-
-  digitalWrite(DisplayPIN, LOW);
+  checkWeight();
+  //digitalWrite(DisplayPIN, LOW);
 }
 
 void loop() {
@@ -90,6 +89,7 @@ void loop() {
   lastButtonState = btnVAL;
 
   if ((millis() - lastTimeSensorCheck) > checkWeightInterv) {
+    Serial.println("- Weight checking###############");
     checkWeight();
   }
 }
@@ -108,32 +108,51 @@ void checkWeight()
 void getWeight()
 {
   bool isBalanced = false;
+  float BalancedW = currentWeight;
+  //long t = 0;
   while (!isBalanced) {
     LoadCell.update();
-    float weightNow = 101560;//LoadCell.getData();
+    float weightNow = LoadCell.getData();
+    Serial.print("Sensor Read: \t");
+    Serial.println(weightNow);
     weightNow = weightNow / 1000;
-    if (weightNow > 0)
+    if ((int)weightNow > 0)
     {
-      float differ = currentWeight - weightNow;
-      if (differ < 0)
+      Serial.print("\tWeigh Now in KG.\t");
+      Serial.println(weightNow);
+      float differ = BalancedW - weightNow;
+      Serial.print("\tWeigh *last* in KG.\t");
+      Serial.println(BalancedW);
+      Serial.print("\tDiffer\t");
+      if (differ < 0.0)
         differ = differ * -1;
-
-      currentWeight = weightNow;
-
+      Serial.println(differ);
+      BalancedW = weightNow;
       if (differ < 0.5)
       {
         isBalanced = true;
+        currentWeight = BalancedW;
       }
       else {
-        delay(100);
+        delay(50);
       }
+
+      //t = millis();
     }
+    else
+    {
+      currentWeight = 0.0;
+      isBalanced = true;
+    }
+    Serial.print("Balanced : \t");
+    Serial.println(isBalanced);
   }
+  lastTimeSensorCheck = millis();
 }
 
 void PrintResult()
 {
-  Serial.print("Current Weight is");
+  Serial.print("Current Weight is\t");
   Serial.println(currentWeight);
   digitalWrite(DisplayPIN, HIGH);
   display.showNumberDecEx(currentWeight, 64, true);
